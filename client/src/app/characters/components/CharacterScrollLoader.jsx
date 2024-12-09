@@ -53,6 +53,19 @@ export default function CharacterScrollLoader({data, search}) {
     }
   }
 
+  const statusColor = (status) => {
+    switch(status) {
+      case "Alive":
+        return "bg-green-400"
+      case "Dead":
+        return "bg-red-600"
+      case "unknown":
+        return "bg-yellow-400"
+      default:
+        return ""
+    }
+  }
+
   //Observer setup and cleanup
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -81,18 +94,27 @@ export default function CharacterScrollLoader({data, search}) {
         <input type="text" placeholder="Search..." onChange={(e) => setSearchQuery(e.target.value)}/>
         <button type="submit">Go</button>
       </form>
-      <div key="characters" className="flex flex-wrap">
+      <div key="characters" className="flex flex-wrap justify-between">
         {characters && characters.map(character =>
           <Link key={character.id} href={`/characters/${encodeURIComponent(character.id)}`}>
-            <div className="w-42 p-3" >
-              <img src={character.image} />
-              <div>{character.name}</div>
+            <div className="bg-white text-black m-3 rounded">
+
+              <div className="w-42 p-3" >
+                <img className="w-full rounded" src={character.image} />
+                <div className="text-xl pt-5">{character.name}</div>
+                <div className="bg-slate-800 text-white px-3 py-0.5 w-fit flex flex-row justify-center items-center rounded-2xl mt-2">
+                  <div className={`${statusColor(character.status)} w-2 h-2 rounded border-gray-500 mr-2`}/>
+                  <div>
+                    {character.status}
+                  </div>
+                </div>
+              </div>
             </div>
           </Link>
         )}
         {endOfList ? <div>End of List</div> : <div ref={loaderRef} className="h-5 bg-transparent"/>}
-        {loading && <div>Loading...</div>}
       </div>
+      {loading && <div>Loading...</div>}
     </>
   )
 }
