@@ -1,6 +1,9 @@
-export const getCharacters = async(page = 1) => {
-  const characters = await fetch(process.env.NEXT_PUBLIC_API_ROOT_URL + `/characters?page=${page}`);
-  return characters.json();
+export const getCharacters = async(opts = {}) => {
+  const urlParams = new URLSearchParams(opts);
+  const res = await fetch(process.env.NEXT_PUBLIC_API_ROOT_URL + `/characters?${urlParams}`);
+  console.log(res);
+  const characters = res.json();
+  return characters;
 }
 
 export const getCharacter = async(id) => {
