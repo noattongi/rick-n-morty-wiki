@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getCharacters } from '../../helpers/api.js'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function CharacterScrollLoader({data, search}) {
 
@@ -16,16 +17,14 @@ export default function CharacterScrollLoader({data, search}) {
 
   const loadMoreCharacters = async() => {
     if (loading || endOfList) return;
-    console.log("Turn off loader?: ", (loading || endOfList))
+
     await setLoading(true);
     try {
       const page = pagesLoaded + 1;
       const nextPage = await getCharacters({page: page, query: searchQuery});
-      console.log(nextPage.characters)
       if (nextPage.characters && nextPage.characters.length !== 0) {
         setCharacters(characters.concat(nextPage.characters));
       } else {
-        console.log("turning off loader")
         setEndOfList(true);
       }
     } catch (error) {
@@ -37,15 +36,18 @@ export default function CharacterScrollLoader({data, search}) {
 
   const searchCharactersByName = async(e) => {
     e.preventDefault();
-    setEndOfList(false);
+    await setEndOfList(false);
     if (!searchQuery || searchQuery.trim() === "") {
       setPagesLoaded(1);
     } else {
+      await setCharacters([]);
+      await setLoading(true);
       try {
         const results = await getCharacters({query: searchQuery});
         if (results.characters) {
-          setCharacters(results.characters);
-          setPagesLoaded(1);
+          await setCharacters(results.characters);
+          await setPagesLoaded(1);
+          await setLoading(false);
         }
       } catch (error) {
         console.error("Error searching for characters", error);
@@ -94,18 +96,18 @@ export default function CharacterScrollLoader({data, search}) {
         <input type="text" placeholder="Search..." onChange={(e) => setSearchQuery(e.target.value)}/>
         <button type="submit">Go</button>
       </form>
-      <div key="characters" className="flex flex-wrap justify-between">
+      <div key="characters" className="grid grid-cols-4">
         {characters && characters.map(character =>
           <Link key={character.id} href={`/characters/${encodeURIComponent(character.id)}`}>
             <div className="bg-white text-black m-3 rounded">
 
               <div className="w-42 p-3" >
-                <img className="w-full rounded" src={character.image} />
+                <Image alt={character.name + " avatar"} className="w-full rounded" src={character.image} width={500} height={500}/>
                 <div className="text-xl pt-5">{character.name}</div>
                 <div className="bg-slate-800 text-white px-3 py-0.5 w-fit flex flex-row justify-center items-center rounded-2xl mt-2">
                   <div className={`${statusColor(character.status)} w-2 h-2 rounded border-gray-500 mr-2`}/>
                   <div>
-                    {character.status}
+                    {character.status} &ndash; {character.species}
                   </div>
                 </div>
               </div>

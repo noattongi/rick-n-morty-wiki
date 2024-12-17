@@ -3,7 +3,7 @@ import {getCharacter} from '../../helpers/api.js'
 
 export default async function CharacterShow ({ params }) {
 
-  const {id} = await params
+  const {id} = await params;
   const {character} = await getCharacter(id);
 
   if (character) {
